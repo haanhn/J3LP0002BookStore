@@ -1,0 +1,77 @@
+/* 
+    Created on : 21-Nov-2019, 11:42:08
+    Author     : HaAnh
+*/
+
+a {
+    color: inherit;
+}
+
+ul {
+    list-style-type: none;
+    text-decoration: none;
+    font-size: 120%;
+    margin: 0;
+    padding: 0;
+}
+.table-records thead {
+    font-size: 110%;
+}
+.table-records td, .table-records th {
+    padding: 5px;
+}
+/******************************
+***********BACKGROUND**********
+*******************************/
+.box-welcome {
+    color: forestgreen;
+    font-size: 110%;
+}
+.list-top-navigation {
+    font-size: 90%;
+    position: absolute;
+    top: 0px;
+    right: 10px;
+}
+.list-top-navigation li {
+    display: inline-block;
+    padding: 10px 0;
+    margin-right: 10px;
+}
+.list-function li {
+    display: inline-block;
+    padding: 10px 0;
+    margin-right: 10px;
+}
+/******************************
+***********PAGE HOME***********
+*******************************/
+.list-tab-roles li {
+    display: inline-block;
+    padding: 10px 0;
+    margin-right: 20px;
+}
+
+.list-tab-roles li:hover {
+    color: #555;
+}
+.active, .active-user, .inactive, .inactive-user {
+    font-weight: bold;
+    font-size: 95%;
+}
+.active, .active-user {
+    color: green;
+}
+.inactive, .inactive-user {
+    color: tomato;
+}
+.show-input-err {
+    color: red;
+}
+.message {
+    font-size: 120%;
+    color: green;
+}
+.delete-link {
+    color: tomato;
+}
