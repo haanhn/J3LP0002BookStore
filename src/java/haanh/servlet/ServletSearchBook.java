@@ -9,9 +9,11 @@ import haanh.author.AuthorDAO;
 import haanh.book.BookDAO;
 import haanh.book.BookDTO;
 import haanh.category.CategoryDAO;
+import haanh.utils.DBUtils;
 import haanh.utils.UrlConstants;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
@@ -24,7 +26,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author HaAnh
  */
-public class ServletAdminViewBookDetail extends HttpServlet {
+public class ServletSearchBook extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,29 +40,40 @@ public class ServletAdminViewBookDetail extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        log(this.getServletName() + " processRequest" );
-        
-        String url = UrlConstants.PAGE_ADMIN_BACKGROUND;
-        request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_BOOK_DETAIL);
-        
-        int bookId = Integer.parseInt(request.getParameter("bookId"));
+        String url = UrlConstants.PAGE_HOME;
         
         try {
-            BookDAO bookDAO = new BookDAO();
+            //Get Parameters
+            String title = request.getParameter("searchedTitle").trim();
+            String minMOneyStr = request.getParameter("minMoney").trim();
+            String maxMOneyStr = request.getParameter("maxMoney").trim();
+            int categoryId = Integer.parseInt(request.getParameter("category"));
+            
+            //Process min & max
+            double min = getMoney(minMOneyStr, DBUtils.BOOK_PRICE_MIN);
+            double max = getMoney(maxMOneyStr, DBUtils.BOOK_PRICE_MAX);
+            if (min > max) {
+                min = DBUtils.BOOK_PRICE_MIN;
+                max = DBUtils.BOOK_PRICE_MAX;
+            }
+            
+            BookDAO dao = new BookDAO();
             CategoryDAO categoryDAO = new CategoryDAO();
             AuthorDAO authorDAO = new AuthorDAO();
             
-            BookDTO bookDTO = bookDAO.getBookById(bookId);
-            Map<Integer, String> authors = authorDAO.getAllAuthors();
+            List<BookDTO> list = dao.searchBooks(title, min, max, categoryId);
             Map<Integer, String> categories = categoryDAO.getAllCategories();
+            Map<Integer, String> authors = authorDAO.getAllAuthors();
             
-            request.setAttribute(UrlConstants.ATTR_BOOK, bookDTO);
-            request.setAttribute(UrlConstants.ATTR_AUTHORS, authors);
+            request.setAttribute(UrlConstants.ATTR_BOOKS, list);
             request.setAttribute(UrlConstants.ATTR_CATEGORIES, categories);
-        } catch (SQLException | NamingException e) {
+            request.setAttribute(UrlConstants.ATTR_AUTHORS, authors);
+        } catch (NamingException | SQLException ex) {
             url = UrlConstants.PAGE_ERROR;
-            log(e.getMessage(), e);
+            log(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            url = UrlConstants.PAGE_ERROR;
+            log(ex.getMessage(), ex);
         }
         
         RequestDispatcher rd = request.getRequestDispatcher(url);
@@ -106,4 +119,12 @@ public class ServletAdminViewBookDetail extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+    private double getMoney(String moneyStr, double defaultMoney) {
+        double money = defaultMoney;
+        try {
+            money = Double.parseDouble(moneyStr);
+        } catch (NumberFormatException ex) {
+        }
+        return money;
+    }
 }

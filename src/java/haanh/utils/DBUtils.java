@@ -19,6 +19,11 @@ import javax.naming.NamingException;
 public class DBUtils {
     
     public static final String ROLE_ADMIN = "AD001";
+    public static final String ROLE_USER = "U001";
+    
+    public static final int BOOK_QUANTITY_EMPTY = 0;
+    public static final double BOOK_PRICE_MIN = 0;
+    public static final double BOOK_PRICE_MAX = 100000000;
     
     public static Connection getConnection() throws NamingException, SQLException {
         Context context = new InitialContext();

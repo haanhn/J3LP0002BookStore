@@ -23,9 +23,11 @@ import java.util.UUID;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -36,6 +38,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  *
  * @author HaAnh
  */
+@MultipartConfig
 public class ServletAdminInsertBook extends HttpServlet {
 
     /**
@@ -55,7 +58,13 @@ public class ServletAdminInsertBook extends HttpServlet {
         String url = UrlConstants.SERVLET_ADMIN_PAGE_INSERT_BOOK;
         request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_INSERT_BOOK);
         
-        if (ServletFileUpload.isMultipartContent(request)) {
+//        String t = request.getParameter("title");
+        Part part = request.getPart("bookImage");//        
+//        part.get
+//        log((t == null));
+//        log(part.getName());
+        
+        if (!ServletFileUpload.isMultipartContent(request)) {
             try {
                 Map<String, String> params = new HashMap<>();
                 FileItem photo = getParameters(request, params);

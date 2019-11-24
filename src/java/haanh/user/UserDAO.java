@@ -50,6 +50,45 @@ public class UserDAO {
         return dto;
     }
     
+    public boolean checkUserIdExist(String userId) throws NamingException, SQLException {
+        boolean existed = false;
+        try {
+            String sql = "select UserId from [User] where UserId=?";
+            con = DBUtils.getConnection();
+            stm = con.prepareStatement(sql);
+            stm.setString(1, userId);
+            rs = stm.executeQuery();
+            if (rs.next()) {
+                existed = true;
+            }
+        } finally {
+            closeConnection();
+        }
+        return existed;
+    }
+    
+    public boolean insertUser(UserDTO dto) throws SQLException, NamingException, NoSuchAlgorithmException {
+        boolean result = false;
+        try {
+            con = DBUtils.getConnection();
+            String sql = "insert into [User](UserId, Password, Active, RoleId) "
+                    + "values (?,?,?,?)";
+            String hashedPassword = StringUtils.getSHA256HashedString(dto.getPassword());
+            stm = con.prepareStatement(sql);
+            stm.setString(1, dto.getUserId());
+            stm.setString(2, hashedPassword);
+            stm.setBoolean(3, dto.getActive());
+            stm.setString(4, dto.getRoleId());
+            int row = stm.executeUpdate();
+            if (row > 0) {
+                result = true;
+            }
+        } finally {
+            closeConnection();
+        }
+        return result;
+    }
+    
     private void closeConnection() throws SQLException {
         if (rs != null) {
             rs.close();

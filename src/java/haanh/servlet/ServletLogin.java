@@ -29,6 +29,8 @@ import javax.servlet.http.HttpSession;
  */
 public class ServletLogin extends HttpServlet {
 
+    private static final String SERVLET_ADMIN_HOME = "/J3LP0002BookStore/admin/getAllBooks";
+    private static final String SERVLET_HOME = "/J3LP0002BookStore/getBooks";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -42,8 +44,10 @@ public class ServletLogin extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         log("processRequest");
+        UserVM userVm = null;
         
-        String url = UrlConstants.PAGE_LOGIN;
+        String url = UrlConstants.PAGE_LOGIN_ERROR;
+        
         String userId = request.getParameter("userId").trim();
         String password = request.getParameter("password").trim();
         
@@ -56,7 +60,7 @@ public class ServletLogin extends HttpServlet {
                 UserProfileDAO profileDao = new UserProfileDAO();
                 UserProfileDTO profileDto = profileDao.findByUserId(userId);
                 
-                UserVM userVm = new UserVM(userId, 
+                userVm = new UserVM(userId, 
                         profileDto.getFullname(), 
                         profileDto.getEmail(), 
                         profileDto.getPhone(), 
@@ -64,27 +68,28 @@ public class ServletLogin extends HttpServlet {
                         userDto.getRoleId());
                 
                 if (userDto.getRoleId().equals(DBUtils.ROLE_ADMIN)) {
-                    url = UrlConstants.PAGE_ADMIN_BACKGROUND;
-                    request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_HOME);
+                    url = SERVLET_ADMIN_HOME;
                 } else {
-                    url = UrlConstants.PAGE_BACKGROUND;
-                    request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_HOME);
+                    url = SERVLET_HOME;
                 }
                 
                 HttpSession session = request.getSession();
                 session.setAttribute(UrlConstants.ATTR_CURRENT_USER, userVm);
-                System.out.println(url);
-            } else {
-                request.setAttribute(UrlConstants.ATTR_MESSAGE, "Wrong User Id or Password");
             }
         } catch (NoSuchAlgorithmException | SQLException | NamingException ex) {
+            url = UrlConstants.PAGE_ERROR;
             log(ex.getMessage(), ex);
         } catch (Exception ex) {
+            url = UrlConstants.PAGE_ERROR;
             log(ex.getMessage(), ex);            
         }
         
-        RequestDispatcher rd = request.getRequestDispatcher(url);
-        rd.forward(request, response);        
+        if (userVm != null) {
+            response.sendRedirect(url);
+        } else {
+            RequestDispatcher rd = request.getRequestDispatcher(url);
+            rd.forward(request, response);
+        }
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

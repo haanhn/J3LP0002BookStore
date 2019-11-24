@@ -21,6 +21,13 @@ public class UserProfileDTO implements Serializable {
     public UserProfileDTO() {
     }
 
+    public UserProfileDTO(String userId, String fullname, String email, String phone) {
+        this.userId = userId;
+        this.fullname = fullname;
+        this.email = email;
+        this.phone = phone;
+    }
+    
     public String getUserId() {
         return userId;
     }

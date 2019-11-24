@@ -41,6 +41,13 @@ public class BookDTO implements Serializable {
         this.authorId = authorId;
     }
 
+    public BookDTO(Integer id, String title, Integer quantity, Double price) {
+        this.id = id;
+        this.title = title;
+        this.quantity = quantity;
+        this.price = price;
+    }
+
     public Integer getId() {
         return id;
     }

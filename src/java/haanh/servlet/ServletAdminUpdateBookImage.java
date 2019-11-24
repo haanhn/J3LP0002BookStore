@@ -8,20 +8,17 @@ package haanh.servlet;
 import haanh.book.BookDAO;
 import haanh.utils.DataUtils;
 import haanh.utils.UrlConstants;
+import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
@@ -32,8 +29,11 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
  *
  * @author HaAnh
  */
+@MultipartConfig
 public class ServletAdminUpdateBookImage extends HttpServlet {
-
+    
+    private static final String PAGE_ERROR = "/J3LP0002BookStore/error.html";
+//    private static final String SERVLET_VIEW_BOOK_DETAIL = "/J3LP0002BookStore/admin/viewBookDetail";
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -49,34 +49,43 @@ public class ServletAdminUpdateBookImage extends HttpServlet {
         log(this.getServletName() + " processRequest");
 
         String url = UrlConstants.SERVLET_ADMIN_VIEW_BOOK_DETAIL;
-//        log("is multipart" + ServletFileUpload.isMultipartContent(request));
+        log("is multipart" + ServletFileUpload.isMultipartContent(request));
         if (ServletFileUpload.isMultipartContent(request)) {
             try {
-                Map<String, String> params = new HashMap<>();
-                FileItem photo = ServletAdminInsertBook.getParameters(request, params);
-
-                boolean validPhoto = ServletAdminInsertBook.validatePhoto(photo);
-                log("valid photo = " + validPhoto);
-                int bookId = Integer.parseInt(params.get("bookId"));
-                log("bookId = " + bookId);
+                Part photo = request.getPart("bookImage");
+                int bookId = Integer.parseInt(request.getParameter("bookId"));
                 url = url + "?bookId=" + bookId;
-
+                
+                log("Photo " + photo);
+                log("Photo file name " + photo.getSubmittedFileName());
+                log("bookId " + bookId);
+                
+                boolean validPhoto = DataUtils.validatePhotoFormat(photo.getSubmittedFileName());
                 if (validPhoto) {
                     String filename = DataUtils.getRandomFilename(photo);
-                    boolean resultPhoto = ServletAdminInsertBook.insertPhoto(photo, filename, getServletContext().getRealPath("/"));
-                    if (resultPhoto) {
-                        BookDAO bookDAO = new BookDAO();
-                        bookDAO.updateBookImage(bookId, filename);
-                    }
-                }
-            } catch (FileUploadException | NamingException | SQLException ex) {
-                url = UrlConstants.PAGE_ERROR;
+                    File file = new File(getServletContext().getRealPath("/") + filename);
+                    log("To write img into" + file.getPath());
+                    photo.write(file.getPath());
+                    BookDAO dao = new BookDAO();
+                    dao.updateBookImage(bookId, filename);
+                } 
+                //khong dung duoc vi res.sendRedirect
+//                else {
+//                    request.setAttribute(UrlConstants.ATTR_MESSAGE_PHOTO, "Allow file image .png or .jpg only");
+//                }
+                
+            }
+            catch (Exception ex) {
                 log(ex.getMessage(), ex);
+                url = PAGE_ERROR;
             }
         }
 
         response.sendRedirect(url);
-
+        //when use senRedirect: /error.html:
+//        --> http://localhost:8084/error.html
+//      when use sendRedirect: error.html
+//      --> http://localhost:8084/J3LP0002BookStore/admin/error.html
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -131,8 +140,8 @@ public class ServletAdminUpdateBookImage extends HttpServlet {
                 params.put(item.getFieldName(), item.getString());
                 log(item.getFieldName() + " " + item.getString());
             } else {
-                log("Photo name: " + photo.getName());
                 photo = item;
+                log("Photo name: " + photo.getName());
             }
         }
         return photo;

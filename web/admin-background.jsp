@@ -21,25 +21,37 @@
             Welcome, ${currentUser.fullname}
         </div>
 
+        <ul class="list-top-navigation">
+            <li>
+                <c:url var="profileLink" value="ServletCenter">
+                    <c:param name="action" value="ViewProfile"/>
+                </c:url>
+                <a href="${profileLink}">View Profile</a>
+            </li>
+            <li>
+                <c:url var="logOutLink" value="/logOut">
+                </c:url>
+                <a href="${logOutLink}">Log Out</a>
+            </li>
+        </ul>
+
         <ul class="list-function">
             <li>
-                <!--c:url: get contextPath + url-->
-                <!--a: get serverPath + url-->
+
                 <c:url var="getAllBooksLink" value="/admin/getAllBooks">
                 </c:url>
                 <a href="${getAllBooksLink}">Get all Books</a>
             </li>
-            
+
             <li>
                 <c:url var="pageInsertBookLink" value="/admin/pageInsertBook">
                 </c:url>
                 <a href="${pageInsertBookLink}">Insert Book</a>
             </li>
-            
+
             <c:if test="${currentUser.roleId eq 'AD001'}">
                 <li>
-                    <c:url var="pageInsertUserLink" value="ServletCenter">
-                        <c:param name="action" value="PageInsert"/>
+                    <c:url var="pageInsertUserLink" value="/admin/pageInsertUser">
                     </c:url>
                     <a href="${pageInsertUserLink}">Insert new User</a>
                 </li>
@@ -55,10 +67,11 @@
                     </c:url>
                     <a href="${pageInsertPromoLink}">Insert new Promotion</a>
                 </li>
+
             </c:if>
         </ul>
 
-        <%= request.getRequestURI() %>
+        <%= request.getRequestURI()%>
         <c:if test="${not empty includedPage}">
             <jsp:include page="${includedPage}"/>
         </c:if>

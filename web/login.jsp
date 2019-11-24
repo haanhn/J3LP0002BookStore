@@ -13,8 +13,10 @@
         <link href="css/myStyle.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <h1>Login Page</h1>
-        <form action="ServletLogin.do" method="POST">
+        <jsp:include page="background.jsp"/>
+        
+        <h2>Login Page</h2>
+        <form action="login" method="POST">
             <table border="0">
                 <tr>
                     <td>User Id</td>

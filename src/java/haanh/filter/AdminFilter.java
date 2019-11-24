@@ -68,7 +68,7 @@ public class AdminFilter implements Filter {
                 log("after doFilter");
             }
         } catch (Throwable t) {
-            log(t.getMessage());
+            log("Error: " + t.getMessage());
         }
 
     }

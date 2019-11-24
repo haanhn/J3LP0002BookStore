@@ -5,13 +5,13 @@
  */
 package haanh.servlet;
 
-import haanh.author.AuthorDAO;
 import haanh.book.BookDAO;
 import haanh.book.BookDTO;
-import haanh.category.CategoryDAO;
+import haanh.cart.CartUtils;
 import haanh.utils.UrlConstants;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
@@ -19,12 +19,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author HaAnh
  */
-public class ServletAdminViewBookDetail extends HttpServlet {
+public class ServletAddBookToCart extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -38,29 +39,29 @@ public class ServletAdminViewBookDetail extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        String url = UrlConstants.SERVLET_SEARCH_BOOK;
         
-        log(this.getServletName() + " processRequest" );
-        
-        String url = UrlConstants.PAGE_ADMIN_BACKGROUND;
-        request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_BOOK_DETAIL);
-        
-        int bookId = Integer.parseInt(request.getParameter("bookId"));
-        
-        try {
+        try {            
+            int bookId = Integer.parseInt(request.getParameter("bookId"));
             BookDAO bookDAO = new BookDAO();
-            CategoryDAO categoryDAO = new CategoryDAO();
-            AuthorDAO authorDAO = new AuthorDAO();
-            
             BookDTO bookDTO = bookDAO.getBookById(bookId);
-            Map<Integer, String> authors = authorDAO.getAllAuthors();
-            Map<Integer, String> categories = categoryDAO.getAllCategories();
             
-            request.setAttribute(UrlConstants.ATTR_BOOK, bookDTO);
-            request.setAttribute(UrlConstants.ATTR_AUTHORS, authors);
-            request.setAttribute(UrlConstants.ATTR_CATEGORIES, categories);
-        } catch (SQLException | NamingException e) {
+            HttpSession session = request.getSession();
+            Map<Integer, BookDTO> cart = (Map<Integer, BookDTO>) session.getAttribute(UrlConstants.ATTR_CART);
+            if (cart == null) {
+                cart = new HashMap<>();
+            }
+            
+            CartUtils cartUtils = new CartUtils();
+            cartUtils.addBookToCart(cart, bookDTO, 1);
+            
+            session.setAttribute(UrlConstants.ATTR_CART, cart);
+        } catch (NamingException | SQLException ex) {
             url = UrlConstants.PAGE_ERROR;
-            log(e.getMessage(), e);
+            log(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            url = UrlConstants.PAGE_ERROR;
+            log(ex.getMessage(), ex);
         }
         
         RequestDispatcher rd = request.getRequestDispatcher(url);

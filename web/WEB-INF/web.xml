@@ -52,9 +52,41 @@
         <servlet-name>ServletAdminUpdateBookImage</servlet-name>
         <servlet-class>haanh.servlet.ServletAdminUpdateBookImage</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>ServletGetBooks</servlet-name>
+        <servlet-class>haanh.servlet.ServletGetBooks</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletSearchBook</servlet-name>
+        <servlet-class>haanh.servlet.ServletSearchBook</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletAddBookToCart</servlet-name>
+        <servlet-class>haanh.servlet.ServletAddBookToCart</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletRemoveItemFromCart</servlet-name>
+        <servlet-class>haanh.servlet.ServletRemoveItemFromCart</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletUpdateItemInCart</servlet-name>
+        <servlet-class>haanh.servlet.ServletUpdateItemInCart</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletCheckOutOrder</servlet-name>
+        <servlet-class>haanh.servlet.ServletCheckOutOrder</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletRegister</servlet-name>
+        <servlet-class>haanh.servlet.ServletRegister</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ServletAdminPageInsertUser</servlet-name>
+        <servlet-class>haanh.servlet.ServletAdminPageInsertUser</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>ServletLogin</servlet-name>
-        <url-pattern>/ServletLogin.do</url-pattern>
+        <url-pattern>/login</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ServletAdminPageInsertBook</servlet-name>
@@ -88,17 +120,53 @@
         <servlet-name>ServletAdminUpdateBookImage</servlet-name>
         <url-pattern>/admin/updateBookImage</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletGetBooks</servlet-name>
+        <url-pattern>/getBooks</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletSearchBook</servlet-name>
+        <url-pattern>/searchBook</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletAddBookToCart</servlet-name>
+        <url-pattern>/addToCart</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletRemoveItemFromCart</servlet-name>
+        <url-pattern>/removeItemFromCart</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletUpdateItemInCart</servlet-name>
+        <url-pattern>/updateItemInCart</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletCheckOutOrder</servlet-name>
+        <url-pattern>/checkOutOrder</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletRegister</servlet-name>
+        <url-pattern>/register</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ServletAdminPageInsertUser</servlet-name>
+        <url-pattern>/admin/pageInsertUser</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30
         </session-timeout>
     </session-config>
     <welcome-file-list>
-        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>getBooks</welcome-file>
     </welcome-file-list>
     <error-page>
         <error-code>404</error-code>
         <location>/page-404.html</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.html</location>
     </error-page>
     <resource-ref>
         <res-ref-name>J3LP0002BookStoreDS</res-ref-name>

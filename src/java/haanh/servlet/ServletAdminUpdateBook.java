@@ -5,27 +5,26 @@
  */
 package haanh.servlet;
 
+import haanh.author.AuthorDAO;
 import haanh.book.BookDAO;
 import haanh.book.BookDTO;
 import haanh.book.BookError;
+import haanh.category.CategoryDAO;
 import haanh.utils.DataUtils;
 import haanh.utils.UrlConstants;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Date;
-import java.util.HashMap;
+import java.sql.SQLException;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.naming.NamingException;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import javax.servlet.http.Part;
 
 /**
  *
@@ -45,56 +44,70 @@ public class ServletAdminUpdateBook extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+
+        String url = UrlConstants.PAGE_ADMIN_BACKGROUND;
+        request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_BOOK_DETAIL);
         
-        
+        //Get parameters        
+        int id = Integer.parseInt(request.getParameter("bookId"));
+        String title = request.getParameter("title").toLowerCase().trim();
+        String priceStr = request.getParameter("price").trim();
+        String quantityStr = request.getParameter("quantity").trim();
+        String description = request.getParameter("description").trim();
+        String dateStr = request.getParameter("dateImported").trim();
+        String activeStr = request.getParameter("active");
+        int author = Integer.parseInt(request.getParameter("author"));
+        int category = Integer.parseInt(request.getParameter("category"));
+
+        BookError error = validateInput(title, description, quantityStr, priceStr, dateStr);
+
         try {
-            if (ServletFileUpload.isMultipartContent(request)) {
-                Map<String, String> params = new HashMap<>();
-//                FileItem photo = ServletAdminInsertBook.getParameters(request, params);
-                FileItem photo = null;
-                //Get parameters        
-                String title = params.get("title").toLowerCase().trim();
-                String description = params.get("description").trim();
-                String priceStr = params.get("price").trim();
-                String quantityStr = params.get("quantity").trim();
-                String dateStr = params.get("dateImported").trim();
-                
-                BookError error = validateInput(title, description, quantityStr, priceStr, dateStr);
-                boolean validPhoto = true;
-                String filename = params.get("currentPhoto");
-                if (photo != null) {
-                    validPhoto = ServletAdminInsertBook.validatePhoto(photo);
-                    filename = UUID.randomUUID().toString();
-                } 
-                
-                
-                
-                if ((error == null) && validPhoto) {
-                    int id = Integer.parseInt(request.getParameter("bookId"));
-                    double price = Double.parseDouble(params.get("price").trim());
-                    int quantity = Integer.parseInt(params.get("quantity").trim());
-                    boolean active = false;
-                    if (params.get("active") != null) {
-                        active = true;
-                    }
-                    int category = Integer.parseInt(params.get("category").trim());
-                    int author = Integer.parseInt(params.get("author").trim());
-                    Date date = DataUtils.getDateFromString(dateStr);
-                    
-                    BookDAO bookDAO = new BookDAO();
-                    BookDTO bookDTO = new BookDTO(id, title, description, quantity, price, null, date, active, category, author);
-                    
-                } else {
-                    request.setAttribute(UrlConstants.ATTR_ERROR, error);
-                    if (!validPhoto) {
-                        request.setAttribute(UrlConstants.ATTR_MESSAGE_PHOTO, "Please choose photo file .png or .jpg only");
-                    }
+            if (error == null) {
+                int quantity = Integer.parseInt(quantityStr);
+                double price = Double.parseDouble(priceStr);
+                Date date = DataUtils.getDateFromString(dateStr);
+                boolean active = false;
+                if (activeStr != null) {
+                    active = true;
                 }
+
+                BookDTO bookDTO = new BookDTO(id, title, description, quantity, price, null, date, active, category, author);
+
+                BookDAO bookDAO = new BookDAO();
+                boolean result = bookDAO.updateBook(bookDTO);
+                
+                if (result) {
+                    request.setAttribute(UrlConstants.ATTR_MESSAGE, "Update book successfully!");
+                } else {
+                    request.setAttribute(UrlConstants.ATTR_MESSAGE, "Update book failed!");
+                }
+            } else {
+                BookDAO bookDAO = new BookDAO();
+                request.setAttribute(UrlConstants.ATTR_ERROR, error);
+                request.setAttribute(UrlConstants.ATTR_BOOK, bookDAO.getBookById(id));
             }
+            
+            BookDAO bookDAO = new BookDAO();
+            CategoryDAO categoryDAO = new CategoryDAO();
+            AuthorDAO authorDAO = new AuthorDAO();
+            
+            BookDTO bookDTO = bookDAO.getBookById(id);
+            Map<Integer, String> authors = authorDAO.getAllAuthors();
+            Map<Integer, String> categories = categoryDAO.getAllCategories();
+            
+            request.setAttribute(UrlConstants.ATTR_BOOK, bookDTO);
+            request.setAttribute(UrlConstants.ATTR_AUTHORS, authors);
+            request.setAttribute(UrlConstants.ATTR_CATEGORIES, categories);
+        } catch (NamingException | SQLException ex) {
+            url = UrlConstants.PAGE_ERROR;
+            log(ex.getMessage(), ex);
         } catch (Exception ex) {
+            url = UrlConstants.PAGE_ERROR;
             log(ex.getMessage(), ex);
         }
 
+        RequestDispatcher rd = request.getRequestDispatcher(url);
+        rd.forward(request, response);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -190,7 +203,7 @@ public class ServletAdminUpdateBook extends HttpServlet {
             error.setDateImportedErr("Date format: dd/MM/yyyy and must be a valid date");
             err = true;
         }
-        
+
         if (!err) {
             error = null;
         }

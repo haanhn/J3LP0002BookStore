@@ -26,7 +26,7 @@
 
         <c:set var="e" value="${error}"/>
         <c:url var="updateLink" value="/admin/updateBook"></c:url>
-            <form action="${updateLink}" method="POST" enctype="multipart/form-data">
+            <form action="${updateLink}" method="POST">
             <table border="0">
                 <tr>
                     <th>Id</th>
@@ -134,6 +134,7 @@
             <input type="hidden" name="bookId" value="${book.id}"/>
             <input type="submit" value="Update Photo" />
         </form>
+        <div class="message">${message}</div>
         <div class="message">${messageBook}</div>
         <div class="message">${messagePhoto}</div>
     </body>

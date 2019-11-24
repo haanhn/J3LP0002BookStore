@@ -5,27 +5,23 @@
  */
 package haanh.servlet;
 
-import haanh.author.AuthorDAO;
-import haanh.book.BookDAO;
 import haanh.book.BookDTO;
-import haanh.category.CategoryDAO;
+import haanh.cart.CartUtils;
 import haanh.utils.UrlConstants;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author HaAnh
  */
-public class ServletAdminViewBookDetail extends HttpServlet {
-
+public class ServletRemoveItemFromCart extends HttpServlet {
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -39,32 +35,24 @@ public class ServletAdminViewBookDetail extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
         
-        log(this.getServletName() + " processRequest" );
-        
-        String url = UrlConstants.PAGE_ADMIN_BACKGROUND;
-        request.setAttribute(UrlConstants.ATTR_INCLUDED_PAGE, UrlConstants.PAGE_ADMIN_BOOK_DETAIL);
-        
-        int bookId = Integer.parseInt(request.getParameter("bookId"));
+        String url = UrlConstants.PAGE_CART_DETAIL;
         
         try {
-            BookDAO bookDAO = new BookDAO();
-            CategoryDAO categoryDAO = new CategoryDAO();
-            AuthorDAO authorDAO = new AuthorDAO();
+            int bookId = Integer.parseInt(request.getParameter("bookId"));
             
-            BookDTO bookDTO = bookDAO.getBookById(bookId);
-            Map<Integer, String> authors = authorDAO.getAllAuthors();
-            Map<Integer, String> categories = categoryDAO.getAllCategories();
+            HttpSession session = request.getSession();
+            Map<Integer, BookDTO> cart = (Map<Integer, BookDTO>) session.getAttribute(UrlConstants.ATTR_CART);
             
-            request.setAttribute(UrlConstants.ATTR_BOOK, bookDTO);
-            request.setAttribute(UrlConstants.ATTR_AUTHORS, authors);
-            request.setAttribute(UrlConstants.ATTR_CATEGORIES, categories);
-        } catch (SQLException | NamingException e) {
+            CartUtils cartUtils = new CartUtils();
+            cartUtils.removeBookFromCart(cart, bookId);
+            
+            session.setAttribute(UrlConstants.ATTR_CART, cart);
+        } catch (Exception ex) {
+            log(ex.getMessage(), ex);
             url = UrlConstants.PAGE_ERROR;
-            log(e.getMessage(), e);
         }
         
-        RequestDispatcher rd = request.getRequestDispatcher(url);
-        rd.forward(request, response);
+        response.sendRedirect(url);
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -106,4 +94,8 @@ public class ServletAdminViewBookDetail extends HttpServlet {
         return "Short description";
     }// </editor-fold>
 
+//    private String buildUrl(String url, String title, String min, String max, String category) {
+//        url =  url + "?searchedTitle=" + title + "&minMoney=" + min + "&maxMoney=" + max + "&category=" + category;
+//        return url;
+//    }
 }

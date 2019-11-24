@@ -15,7 +15,7 @@
     </head>
     <body>
         <h2>List all Books</h2>
-
+        
         <c:if test="${not empty books}">
             <table border="0">
                 <thead>
